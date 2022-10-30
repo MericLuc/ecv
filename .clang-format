@@ -1,0 +1,15 @@
+BasedOnStyle: Mozilla
+AccessModifierOffset: '-4'
+AlignAfterOpenBracket: 'Align'
+AlignConsecutiveDeclarations: 'true'
+AlignEscapedNewlines: 'Right'
+AlignTrailingComments: 'true'
+AllowShortBlocksOnASingleLine: 'Always'
+AlignOperands: 'true'
+ColumnLimit: '100'
+CompactNamespaces: 'false'
+IndentWidth: '4'
+KeepEmptyLinesAtTheStartOfBlocks: 'false'
+Language: Cpp
+TabWidth: '4'
+UseTab: Never

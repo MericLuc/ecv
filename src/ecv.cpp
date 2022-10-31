@@ -8,7 +8,6 @@
 
 // Project's headers
 #include <ecv.hpp>
-#include <iostream>
 
 namespace ecv {
 
@@ -122,7 +121,7 @@ struct DLX::Impl
     std::vector<Node>   _nodes;
 
     std::vector<Solution> _solutions;
-    Solution              _curSol;
+    std::stack<int>       _curSol;
 
     Column*               col_select(void) noexcept;
     [[maybe_unused]] bool init(const std::vector<bool>& data,
@@ -263,17 +262,21 @@ DLX::solve(bool all) noexcept
 
 /*****************************************************************************/
 std::unique_ptr<LatinSquares>
-LatinSquares::generate(const std::vector<std::string>& inputs) noexcept
+LatinSquares::generate(const State& state) noexcept
 {
     // Initial adjacency matrix dimensions ( without constraints )
-    auto N{ std::size(inputs) }, rows{ N * N * N }, cols{ 3 * N * N };
+    auto N{ std::size(state) }, rows{ N * N * N }, cols{ 3 * N * N };
+
+    for (const auto& line : state)
+        if (N != std::size(line))
+            return nullptr;
 
     // Constraints ( non-zero nodes on provided inputs )
     auto authRows{ std::vector<int>(rows, 1) }, authCols{ std::vector<int>(cols, 1) };
 
     for (size_t i{ 0 }; i < N; ++i) {
         for (size_t j{ 0 }; j < N; ++j) {
-            auto val{ inputs[i][j] - '0' };
+            auto val{ state[i][j] - '0' };
             if (0 == val)
                 continue; // No constraint on the node
 
@@ -319,31 +322,31 @@ LatinSquares::generate(const std::vector<std::string>& inputs) noexcept
 
     struct shared_enabler : public LatinSquares
     {
-        shared_enabler(const std::vector<bool>&        data,
-                       size_t                          rows,
-                       size_t                          cols,
-                       const std::vector<int>&         rowsList,
-                       const std::vector<std::string>& inputs)
-          : LatinSquares(data, rows, cols, rowsList, inputs)
+        shared_enabler(const std::vector<bool>& data,
+                       size_t                   rows,
+                       size_t                   cols,
+                       const std::vector<int>&  rowsList,
+                       const State&             state)
+          : LatinSquares(data, rows, cols, rowsList, state)
         {}
     };
 
-    return std::make_unique<shared_enabler>(adj, R, C, rowsList, inputs);
+    return std::make_unique<shared_enabler>(adj, R, C, rowsList, state);
 }
 
 /*****************************************************************************/
-LatinSquares::LatinSquares(const std::vector<bool>&        data,
-                           size_t                          rows,
-                           size_t                          cols,
-                           const std::vector<int>&         rowsList,
-                           const std::vector<std::string>& inputs) noexcept
+LatinSquares::LatinSquares(const std::vector<bool>& data,
+                           size_t                   rows,
+                           size_t                   cols,
+                           const std::vector<int>&  rowsList,
+                           const State&             initStata) noexcept
   : DLX(data, rows, cols, rowsList)
-  , _initState{ inputs }
+  , _initState{ initStata }
 {}
 
 /*****************************************************************************/
-std::vector<std::string>
-LatinSquares::toString(const Solution& s) noexcept
+State
+LatinSquares::apply(const Solution& s) noexcept
 {
     // TODO
     // - optimize
@@ -354,7 +357,7 @@ LatinSquares::toString(const Solution& s) noexcept
     if (std::empty(ret))
         return ret;
 
-    const std::vector<int> contents{ &s.top() + 1 - std::size(s), &s.top() + 1 };
+    const std::vector<int> contents{ &s._d.top() + 1 - std::size(s._d), &s._d.top() + 1 };
     auto                   R{ std::size(_initState) }, C{ std::size(_initState[0]) };
 
     for (const auto& line : contents) {

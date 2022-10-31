@@ -18,13 +18,34 @@
  */
 namespace ecv {
 
+/*!
+ * \brief State is the representation of an exact cover problem state
+ */
+typedef std::vector<std::string> State;
+
+/*!
+ * \brief The LatinSquares class is the DLX implementation of an exact cover problem
+ * \see https://arxiv.org/pdf/cs/0011047v1.pdf for more informations about
+ * DLX (dancing links) algorithm.
+ *
+ * It basically is just a way of implementing backtracking, recursive, DFS algorithm
+ * to solve exact cover problems using circular double linked lists.
+ */
 class DLX
 {
-public:
-    typedef std::stack<int> Solution; ///< A solution is a combinaison of rows
+protected:
+    struct Solution
+    { ///< A solution is a combinaison of rows
+        explicit Solution(const std::stack<int>& data) noexcept
+          : _d{ data }
+        {}
 
-    virtual std::vector<Solution>    solve(bool all = true) noexcept;
-    virtual std::vector<std::string> toString(const Solution& s) noexcept = 0;
+        const std::stack<int> _d;
+    };
+
+public:
+    virtual std::vector<Solution> solve(bool all = true) noexcept;
+    virtual State                 apply(const Solution& s) noexcept = 0;
 
 protected:
     DLX(const std::vector<bool>& data, size_t rows, size_t cols, const std::vector<int>& rowsList)
@@ -37,9 +58,8 @@ protected:
 };
 
 /*!
- * \brief The DLX class is the DLX implementation of an exact cover problem
- * \see https://arxiv.org/pdf/cs/0011047v1.pdf for more informations about
- * DLX (dancing links) algorithm.
+ * \brief The LatinSquares class is the implementation of the "latin squares" exact cover problem
+ * \see https://en.wikipedia.org/wiki/Latin_square for more informations about "latin squares"
  */
 class LatinSquares : public DLX
 {
@@ -47,26 +67,25 @@ public:
     /*!
      * \brief generate Generate a data structure corresponding to the "latin squares"
      * exact cover problem.
-     * For more informations about that problem \see https://en.wikipedia.org/wiki/Latin_square
-     * \param inputs a String representation of the problem as a grid.
+     * \param state a String representation of the problem as a grid.
      * Use '0' to represent non-constrained cells
-     * \return An exact cover problem pointer (\a Problem) in case of success, nullptr otherwise
+     * \return An exact cover problem pointer in case of success, nullptr otherwise
      */
-    static std::unique_ptr<LatinSquares> generate(const std::vector<std::string>& inputs) noexcept;
+    static std::unique_ptr<LatinSquares> generate(const State& state) noexcept;
 
-    std::vector<std::string> toString(const Solution& s) noexcept override;
+    State apply(const Solution& s) noexcept override;
 
     virtual ~LatinSquares() noexcept = default;
 
 protected:
-    LatinSquares(const std::vector<bool>&        data,
-                 size_t                          rows,
-                 size_t                          cols,
-                 const std::vector<int>&         rowsList,
-                 const std::vector<std::string>& inputs) noexcept;
+    LatinSquares(const std::vector<bool>& data,
+                 size_t                   rows,
+                 size_t                   cols,
+                 const std::vector<int>&  rowsList,
+                 const State&             initStata) noexcept;
 
 private:
-    const std::vector<std::string> _initState;
+    const State _initState;
 };
 
 } // namespace ecv

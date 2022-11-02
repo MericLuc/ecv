@@ -203,7 +203,8 @@ std::vector<DLX::Solution>
 DLX::Impl::solve(bool all) noexcept
 {
     _solutions.clear();
-    _solve(all);
+    if (!std::empty(_nodes))
+        _solve(all);
     return _solutions;
 }
 

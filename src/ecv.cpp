@@ -365,7 +365,7 @@ LatinSquares::apply(const Solution& s) noexcept
         if (static_cast<size_t>(line) > R * R * C)
             return ret;
         auto pos{ line / R };
-        auto val{ line % R };
+        auto val{ (line % R) + 1 };
 
         ret[pos / C][pos % C] = (0 == val) ? R + '0' : val + '0';
     }

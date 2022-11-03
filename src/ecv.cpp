@@ -4,10 +4,11 @@
  * @author lhm
  */
 
-// Standard headers
-
 // Project's headers
 #include <ecv.hpp>
+
+// Standard headers
+#include <limits>
 
 namespace ecv {
 
@@ -121,15 +122,15 @@ struct DLX::Impl
     std::vector<Node>   _nodes;
 
     std::vector<Solution> _solutions;
-    std::stack<int>       _curSol;
+    std::vector<int>      _curSol;
 
     Column*               col_select(void) noexcept;
     [[maybe_unused]] bool init(const std::vector<bool>& data,
                                size_t                   R,
                                size_t                   C,
                                const std::vector<int>&  rowsList) noexcept;
-    std::vector<Solution> solve(bool) noexcept;
-    bool                  _solve(bool) noexcept;
+    std::vector<Solution> solve(uint32_t) noexcept;
+    bool                  _solve(const uint32_t&, uint32_t&) noexcept;
 
     auto zeros(void) noexcept { return (_head._r == &_head) && (_head._l == &_head); }
 };
@@ -157,6 +158,7 @@ DLX::Impl::init(const std::vector<bool>& data,
     if (0 == R || 0 == C || std::size(data) != R * C)
         return false;
 
+    _curSol.reserve(std::size(rowsList));
     _cols.resize(C);
     _nodes.resize(R * C);
 
@@ -200,11 +202,13 @@ DLX::Impl::init(const std::vector<bool>& data,
 
 /*****************************************************************************/
 std::vector<DLX::Solution>
-DLX::Impl::solve(bool all) noexcept
+DLX::Impl::solve(uint32_t max_solutions = std::numeric_limits<uint32_t>::max()) noexcept
 {
+    uint32_t sol_count{ 0 };
     _solutions.clear();
+
     if (!std::empty(_nodes))
-        _solve(all);
+        _solve(max_solutions, sol_count);
     return _solutions;
 }
 
@@ -220,14 +224,15 @@ DLX::DLX(const std::vector<bool>& data,
 
 /*****************************************************************************/
 bool
-DLX::Impl::_solve(bool all) noexcept
+DLX::Impl::_solve(const uint32_t& max_solutions, uint32_t& sol_count) noexcept
 {
-    if (!all && !std::empty(_solutions))
+    if (max_solutions == sol_count)
         return true;
 
     // Apply DLX algorithm (recursive, non-deterministic)
     if (zeros()) { // success
         _solutions.emplace_back(_curSol);
+        ++sol_count;
         return true;
     }
 
@@ -240,14 +245,14 @@ DLX::Impl::_solve(bool all) noexcept
     for (auto cRow{ curCol->_head._d }; &curCol->_head != cRow; cRow = cRow->_d) {
         for (auto cCol{ cRow->_r }; cRow != cCol; cCol = cCol->_r) {
             cCol->_col->remove();
-            _curSol.push(cCol->_row);
+            _curSol.push_back(cCol->_row);
         }
 
-        _solve(all);
+        _solve(max_solutions, sol_count);
 
         for (auto cCol{ cRow->_l }; cRow != cCol; cCol = cCol->_l) {
             cCol->_col->restore();
-            _curSol.pop();
+            _curSol.pop_back();
         }
     }
     curCol->restore();
@@ -256,9 +261,9 @@ DLX::Impl::_solve(bool all) noexcept
 
 /*****************************************************************************/
 std::vector<DLX::Solution>
-DLX::solve(bool all) noexcept
+DLX::solve(uint32_t max_solutions) noexcept
 {
-    return pimpl->solve(all);
+    return pimpl->solve(max_solutions);
 }
 
 /*****************************************************************************/
@@ -358,10 +363,9 @@ LatinSquares::apply(const Solution& s) noexcept
     if (std::empty(ret))
         return ret;
 
-    const std::vector<int> contents{ &s._d.top() + 1 - std::size(s._d), &s._d.top() + 1 };
-    auto                   R{ std::size(_initState) }, C{ std::size(_initState[0]) };
+    auto R{ std::size(_initState) }, C{ std::size(_initState[0]) };
 
-    for (const auto& line : contents) {
+    for (const auto& line : s._d) {
         if (static_cast<size_t>(line) > R * R * C)
             return ret;
         auto pos{ line / R };

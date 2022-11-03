@@ -8,8 +8,8 @@
 #define INCLUDE_ECV_HPP
 
 // Standard headers
+#include <limits>
 #include <memory>
-#include <stack>
 #include <string>
 #include <vector>
 
@@ -36,16 +36,17 @@ class DLX
 protected:
     struct Solution
     { ///< A solution is a combinaison of rows
-        explicit Solution(const std::stack<int>& data) noexcept
+        explicit Solution(const std::vector<int>& data) noexcept
           : _d{ data }
         {}
 
-        const std::stack<int> _d;
+        const std::vector<int> _d;
     };
 
 public:
-    virtual std::vector<Solution> solve(bool all = true) noexcept;
-    virtual State                 apply(const Solution& s) noexcept = 0;
+    virtual std::vector<Solution> solve(
+      uint32_t max_solutions = std::numeric_limits<uint32_t>::max()) noexcept;
+    virtual State apply(const Solution& s) noexcept = 0;
 
 protected:
     DLX(const std::vector<bool>& data, size_t rows, size_t cols, const std::vector<int>& rowsList)

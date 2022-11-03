@@ -12,8 +12,8 @@ The **ecv** library consists of a public header [**include/ecv.hpp**](./include/
 
 Solve a problem using DLX :
 - **DLX** is the DLX implementation. Concrete exact cover problems inherit from it.
- - **DLX::solve(bool)** solves the problem and generate all (or one if passing false) solutions to the problem.
- - **DLX::apply(const Solution&)** gives your the problem state when applying one of its solutions.
+ - **DLX::solve(uint32_t max_nb)** solves the problem and generate at most **max_nb** solutions to the problem.
+ - **DLX::apply(const Solution&)** returns the problem state when applying one of its solutions.
 
 Create a solvable concrete problem :
  - **LatinSquares::generate()** generates a concrete "Latin square" problem.
@@ -49,7 +49,7 @@ int main() {
 	
 	// Let's print it 
 	for     ( const auto& line : myProblemSolved ) {
-		for ( const auto& cell : line            )
+		for   ( const auto& cell : line            )
 				std::cout << cell << " ";
 		std::cout << '\n';
 	}
@@ -90,7 +90,7 @@ Install the project...
 ## TODO
 
 - [ ] Add common [exact cover problems](https://en.wikipedia.org/wiki/Exact_cover) implementations
-  - [ ] Latin square
+  - [x] Latin square
   - [ ] Sudoku
   - [ ] N Queens problem
   - [ ] Pentomino tiling

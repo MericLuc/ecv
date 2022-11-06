@@ -48,8 +48,8 @@ int main() {
 	State myProblemSolved{ obj->apply(solutions[0]) };
 	
 	// Let's print it 
-	for     ( const auto& line : myProblemSolved ) {
-		for   ( const auto& cell : line            )
+	for ( const auto& line : myProblemSolved ) {
+		for ( const auto& cell : line )
 				std::cout << cell << " ";
 		std::cout << '\n';
 	}
@@ -86,6 +86,13 @@ Install the project...
 -- Installing: ${YOUR_INSTALL_DIR}/ecv/lib/libecv.a
 -- Installing: ${YOUR_INSTALL_DIR}/ecv/include/ecv.hpp
 ```
+
+## Applications
+
+### Latin square
+
+- Sources : https://github.com/MericLuc/ecv-latinsquare
+- Online demo : https://mericluc.github.io/ecv/latinsquare/app.html
 
 ## TODO
 

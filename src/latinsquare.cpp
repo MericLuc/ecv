@@ -10,6 +10,13 @@
 namespace ecv {
 
 /*****************************************************************************/
+State
+LatinSquares::make_empty_state(size_t rows, size_t cols) noexcept
+{
+    return std::vector<std::string>(rows, std::string(cols, '0'));
+}
+
+/*****************************************************************************/
 std::unique_ptr<LatinSquares>
 LatinSquares::generate(const State& state) noexcept
 {

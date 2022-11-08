@@ -65,6 +65,9 @@ protected:
 class LatinSquares : public DLX
 {
 public:
+    static State make_empty_state(size_t rows = 1, size_t cols = 1) noexcept;
+
+public:
     /*!
      * \brief generate Generate a data structure corresponding to the "latin squares"
      * exact cover problem.
@@ -72,7 +75,7 @@ public:
      * Use '0' to represent non-constrained cells
      * \return An exact cover problem pointer in case of success, nullptr otherwise
      */
-    static std::unique_ptr<LatinSquares> generate(const State& state) noexcept;
+    static std::unique_ptr<LatinSquares> generate(const State& state = make_empty_state()) noexcept;
 
     State apply(const Solution& s) noexcept override;
 
@@ -96,6 +99,9 @@ private:
 class Sudoku : public DLX
 {
 public:
+    static State make_empty_state() noexcept;
+
+public:
     /*!
      * \brief generate Generate a data structure corresponding to the "sudoku"
      * exact cover problem.
@@ -103,7 +109,7 @@ public:
      * Use '0' to represent non-constrained cells
      * \return An exact cover problem pointer in case of success, nullptr otherwise
      */
-    static std::unique_ptr<Sudoku> generate(const State& state) noexcept;
+    static std::unique_ptr<Sudoku> generate(const State& state = make_empty_state()) noexcept;
 
     State apply(const Solution& s) noexcept override;
 

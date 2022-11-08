@@ -61,7 +61,7 @@ Sudoku::generate(const State& state) noexcept
             for (size_t k{ 0 }; k < 3; ++k) {
                 for (size_t l{ 0 }; l < 3; ++l) {
                     // cannot put val in the 3*3 area
-                    authRows[(k + (i / 3)) * N * N + (l + (j / 3)) * N + val - 1] = 0;
+                    authRows[(k + 3 * (i / 3)) * N * N + (l + 3 * (j / 3)) * N + val - 1] = 0;
                 }
             }
 

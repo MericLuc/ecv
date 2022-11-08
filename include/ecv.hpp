@@ -89,6 +89,37 @@ private:
     const State _initState;
 };
 
+/*!
+ * \brief The Sudoku class is the implementation of the "sudoku" exact cover problem
+ * \see https://en.wikipedia.org/wiki/sudoku for more informations about "sudoku"
+ */
+class Sudoku : public DLX
+{
+public:
+    /*!
+     * \brief generate Generate a data structure corresponding to the "sudoku"
+     * exact cover problem.
+     * \param state a String representation of the problem as a grid.
+     * Use '0' to represent non-constrained cells
+     * \return An exact cover problem pointer in case of success, nullptr otherwise
+     */
+    static std::unique_ptr<Sudoku> generate(const State& state) noexcept;
+
+    State apply(const Solution& s) noexcept override;
+
+    virtual ~Sudoku() noexcept = default;
+
+protected:
+    Sudoku(const std::vector<bool>& data,
+           size_t                   rows,
+           size_t                   cols,
+           const std::vector<int>&  rowsList,
+           const State&             initStata) noexcept;
+
+private:
+    const State _initState;
+};
+
 } // namespace ecv
 
 #endif // INCLUDE_ECV_HPP

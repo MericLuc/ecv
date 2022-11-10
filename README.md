@@ -94,11 +94,16 @@ Install the project...
 - Sources : https://github.com/MericLuc/ecv-latinsquare
 - Online demo : https://mericluc.github.io/ecv/latinsquare/app.html
 
+### Sudoku
+
+- Sources : https://github.com/MericLuc/ecv-sudoku
+- Online demo : https://mericluc.github.io/ecv/sudoku/app.html
+
 ## TODO
 
 - [ ] Add common [exact cover problems](https://en.wikipedia.org/wiki/Exact_cover) implementations
   - [x] Latin square
-  - [ ] Sudoku
+  - [x] Sudoku
   - [ ] N Queens problem
   - [ ] Pentomino tiling
   - ...

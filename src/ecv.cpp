@@ -44,8 +44,9 @@ struct Column : public IDataObj<Column>
     virtual void erase(void) noexcept override;
 
 public:
-    Node _head; // Head
-    int  _size; // Number of ones in the column, used for branching optimization
+    Node _head;    // Head
+    int  _size;    // Number of ones in the column, used for branching optimization
+    bool _primary; // Does it correspond to an essential or optional constraint
 };
 
 /*****************************************************************************/
@@ -125,7 +126,8 @@ struct DLX::Impl
     [[maybe_unused]] bool init(const std::vector<bool>& data,
                                size_t                   R,
                                size_t                   C,
-                               const std::vector<int>&  rowsList) noexcept;
+                               const std::vector<int>&  rowsList,
+                               int                      primary) noexcept;
     std::vector<Solution> solve(uint32_t) noexcept;
     bool                  _solve(const uint32_t&, uint32_t&) noexcept;
 
@@ -137,7 +139,7 @@ Column*
 DLX::Impl::col_select(void) noexcept
 {
     auto ret{ _head._r };
-    for (auto cdt{ ret->_r }; &_head != cdt; cdt = cdt->_r) {
+    for (auto cdt{ ret->_r }; (cdt->_primary && &_head != cdt); cdt = cdt->_r) {
         if (cdt->_size < ret->_size)
             ret = cdt;
     }
@@ -150,10 +152,14 @@ bool
 DLX::Impl::init(const std::vector<bool>& data,
                 size_t                   R,
                 size_t                   C,
-                const std::vector<int>&  rowsList) noexcept
+                const std::vector<int>&  rowsList,
+                int                      primary) noexcept
 {
     if (0 == R || 0 == C || std::size(data) != R * C)
         return false;
+
+    if (0 > primary)
+        primary = C;
 
     _curSol.reserve(std::size(rowsList));
     _cols.resize(C);
@@ -161,6 +167,7 @@ DLX::Impl::init(const std::vector<bool>& data,
 
     _head._r = &_cols[0];
     _head._l = &_cols[C - 1];
+    _head._primary = false;
     _cols[0]._l = &_head;
     _cols[C - 1]._r = &_head;
 
@@ -169,8 +176,10 @@ DLX::Impl::init(const std::vector<bool>& data,
         _cols[i + 1]._l = &_cols[i];
     }
 
-    for (size_t i{ 0 }; i < C; ++i)
+    for (size_t i{ 0 }; i < C; ++i) {
         _cols[i]._size = R;
+        _cols[i]._primary = (static_cast<int>(i) < primary);
+    }
 
     for (size_t i{ 0 }, k{ 0 }; i < R; ++i) {
         for (size_t j{ 0 }; j < C; ++j, ++k) {
@@ -213,10 +222,11 @@ DLX::Impl::solve(uint32_t max_solutions = std::numeric_limits<uint32_t>::max()) 
 DLX::DLX(const std::vector<bool>& data,
          size_t                   rows,
          size_t                   cols,
-         const std::vector<int>&  rowsList) noexcept
+         const std::vector<int>&  rowsList,
+         int                      primary) noexcept
   : pimpl{ std::make_shared<Impl>() }
 {
-    pimpl->init(data, rows, cols, rowsList);
+    pimpl->init(data, rows, cols, rowsList, primary);
 }
 
 /*****************************************************************************/
@@ -227,7 +237,9 @@ DLX::Impl::_solve(const uint32_t& max_solutions, uint32_t& sol_count) noexcept
         return true;
 
     // Apply DLX algorithm (recursive, non-deterministic)
-    if (zeros()) { // success
+
+    // No more primary constraints, only optionals. We are good to go
+    if (!_head._r->_primary || zeros()) { // success
         _solutions.emplace_back(_curSol);
         ++sol_count;
         return true;

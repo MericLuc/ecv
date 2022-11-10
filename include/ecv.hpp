@@ -49,7 +49,22 @@ public:
     virtual State apply(const Solution& s) noexcept = 0;
 
 protected:
-    DLX(const std::vector<bool>& data, size_t rows, size_t cols, const std::vector<int>& rowsList)
+    /*!
+     * \brief DLX Create a DLX algorithm
+     * \param data The data of the adjacency matrix
+     * \param rows The number of rows in \a data
+     * \param cols The number of cols in \a data
+     * \param rowsList The list of row identifiers (usefull to parse problem state from solutions)
+     * \param primary The number of primary constraints.
+     * By default, every constraint is primary (meaning it has to be satisfied exactly once)
+     * Columns past \a primary index will be considered as 'secondary' (meaning the can be left
+     * unsatisfied)
+     */
+    DLX(const std::vector<bool>& data,
+        size_t                   rows,
+        size_t                   cols,
+        const std::vector<int>&  rowsList,
+        int                      primary = -1)
     noexcept;
     virtual ~DLX() noexcept = default;
 
@@ -121,6 +136,41 @@ protected:
            size_t                   cols,
            const std::vector<int>&  rowsList,
            const State&             initStata) noexcept;
+
+private:
+    const State _initState;
+};
+
+/*!
+ * \brief The NQueens class is the implementation of the "N Queen" exact cover problem, which is a
+ * generalization of the initial 8-Queen problem (\see
+ * https://en.wikipedia.org/wiki/Eight_queens_puzzle) for more informations about.
+ */
+class NQueens : public DLX
+{
+public:
+    static State make_empty_state(size_t dim = 8) noexcept;
+
+public:
+    /*!
+     * \brief generate Generate a data structure corresponding to the "N-Queen" exact cover problem.
+     * \param state a String representation of the problem as a grid.
+     * Use '0' to represent non-constrained (i.e. empty) cells, everything else for a cell with a
+     * Queen. \return An exact cover problem pointer in case of success, nullptr otherwise
+     */
+    static std::unique_ptr<NQueens> generate(const State& state = make_empty_state()) noexcept;
+
+    State apply(const Solution& s) noexcept override;
+
+    virtual ~NQueens() noexcept = default;
+
+protected:
+    NQueens(const std::vector<bool>& data,
+            size_t                   rows,
+            size_t                   cols,
+            const std::vector<int>&  rowsList,
+            const State&             initStata,
+            int                      primary) noexcept;
 
 private:
     const State _initState;

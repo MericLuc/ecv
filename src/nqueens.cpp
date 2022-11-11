@@ -125,7 +125,7 @@ NQueens::NQueens(const std::vector<bool>& data,
                  const std::vector<int>&  rowsList,
                  const State&             initStata,
                  int                      primary) noexcept
-  : DLX(data, rows, cols, rowsList, primary)
+  : ConcreteProblem(data, rows, cols, rowsList, primary)
   , _initState{ initStata }
 {}
 

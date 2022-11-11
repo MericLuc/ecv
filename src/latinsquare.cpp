@@ -101,7 +101,7 @@ LatinSquares::LatinSquares(const std::vector<bool>& data,
                            size_t                   cols,
                            const std::vector<int>&  rowsList,
                            const State&             initStata) noexcept
-  : DLX(data, rows, cols, rowsList)
+  : ConcreteProblem(data, rows, cols, rowsList)
   , _initState{ initStata }
 {}
 

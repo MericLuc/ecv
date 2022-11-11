@@ -161,7 +161,11 @@ DLX::Impl::init(const std::vector<bool>& data,
     if (0 > primary)
         primary = C;
 
-    _curSol.reserve(std::size(rowsList));
+    // Either rows ids are not provided, or incomplete
+    // In both case, use indexes instead.
+    bool rowsIdByIdx{ std::empty(rowsList) || (R != std::size(rowsList)) };
+
+    _curSol.reserve(R);
     _cols.resize(C);
     _nodes.resize(R * C);
 
@@ -188,7 +192,7 @@ DLX::Impl::init(const std::vector<bool>& data,
             if (k >= (R - 1) * C)
                 _cols[j]._head._u = &_nodes[k];
 
-            _nodes[k]._row = rowsList[i];
+            _nodes[k]._row = rowsIdByIdx ? i : rowsList[i];
             _nodes[k]._col = &_cols[j];
 
             _nodes[k]._l = (0 == k % C) ? &_nodes[k + C - 1] : &_nodes[k - 1];
@@ -274,5 +278,39 @@ DLX::solve(uint32_t max_solutions) noexcept
 {
     return pimpl->solve(max_solutions);
 }
+
+/*****************************************************************************/
+std::unique_ptr<GenericProblem>
+GenericProblem::generate(const std::vector<bool>& data,
+                         size_t                   rows,
+                         size_t                   cols,
+                         int                      primary) noexcept
+{
+    struct shared_enabler : public GenericProblem
+    {
+        shared_enabler(const std::vector<bool>& data, size_t rows, size_t cols, int primary)
+          : GenericProblem(data, rows, cols, primary)
+        {}
+    };
+
+    return std::make_unique<shared_enabler>(data, rows, cols, primary);
+}
+
+/*****************************************************************************/
+GenericProblem::GenericProblem(const std::vector<bool>& data,
+                               size_t                   rows,
+                               size_t                   cols,
+                               int                      primary) noexcept
+  : DLX(data, rows, cols, {}, primary)
+{}
+
+/*****************************************************************************/
+ConcreteProblem::ConcreteProblem(const std::vector<bool>& data,
+                                 size_t                   rows,
+                                 size_t                   cols,
+                                 const std::vector<int>&  rowsList,
+                                 int                      primary) noexcept
+  : DLX(data, rows, cols, rowsList, primary)
+{}
 
 } // namespace ecv

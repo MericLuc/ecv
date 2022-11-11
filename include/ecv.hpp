@@ -46,7 +46,6 @@ protected:
 public:
     virtual std::vector<Solution> solve(
       uint32_t max_solutions = std::numeric_limits<uint32_t>::max()) noexcept;
-    virtual State apply(const Solution& s) noexcept = 0;
 
 protected:
     /*!
@@ -74,10 +73,59 @@ protected:
 };
 
 /*!
- * \brief The LatinSquares class is the implementation of the "latin squares" exact cover problem
- * \see https://en.wikipedia.org/wiki/Latin_square for more informations about "latin squares"
+ * \brief The GenericProblem class allows to apply DLX algorithm on already formalized problems.
+ * That is, problems for which the adjacency matrix has already been created.
  */
-class LatinSquares : public DLX
+class GenericProblem : public DLX
+{
+public:
+    /*!
+     * \brief generate Allows to create a generic exact cover problem from raw inputs.
+     * It can be usefull if you already have (or can easily build) an adjacency matrix.
+     *
+     * \param data An adjacency matrix
+     * \param rows The number of rows in \a data
+     * \param cols The number of columns in \a data
+     * \param primary The number of primary (i.e. essentials) constraints
+     * \return A generic exact cover problem in case of success, nullptr otherwise
+     */
+    static std::unique_ptr<GenericProblem> generate(const std::vector<bool>& data,
+                                                    size_t                   rows,
+                                                    size_t                   cols,
+                                                    int                      primary = -1) noexcept;
+
+protected:
+    GenericProblem(const std::vector<bool>& data, size_t rows, size_t cols, int primary) noexcept;
+};
+
+/*!
+ * \brief The ConcreteProblem class is the base class for every concrete exact cover problems.
+ */
+class ConcreteProblem : public DLX
+{
+public:
+    /*!
+     * \brief apply Get the state of the concrete problem when applying a solution to it.
+     * \param s a solution (given by 'DLX::solve()')
+     * \return the state of the problem when applying the solution
+     */
+    virtual State apply(const Solution& s) noexcept = 0;
+
+protected:
+    ConcreteProblem(const std::vector<bool>& data,
+                    size_t                   rows,
+                    size_t                   cols,
+                    const std::vector<int>&  rowsList,
+                    int                      primary = -1) noexcept;
+    virtual ~ConcreteProblem() noexcept = default;
+};
+
+/*!
+ * \brief The LatinSquares class is the implementation of the "latin squares" exact cover
+ * problem \see https://en.wikipedia.org/wiki/Latin_square for more informations about "latin
+ * squares"
+ */
+class LatinSquares : public ConcreteProblem
 {
 public:
     static State make_empty_state(size_t rows = 1, size_t cols = 1) noexcept;
@@ -88,7 +136,7 @@ public:
      * exact cover problem.
      * \param state a String representation of the problem as a grid.
      * Use '0' to represent non-constrained cells
-     * \return An exact cover problem pointer in case of success, nullptr otherwise
+     * \return A "Latin square" exact cover problem pointer in case of success, nullptr otherwise
      */
     static std::unique_ptr<LatinSquares> generate(const State& state = make_empty_state()) noexcept;
 
@@ -111,7 +159,7 @@ private:
  * \brief The Sudoku class is the implementation of the "sudoku" exact cover problem
  * \see https://en.wikipedia.org/wiki/sudoku for more informations about "sudoku"
  */
-class Sudoku : public DLX
+class Sudoku : public ConcreteProblem
 {
 public:
     static State make_empty_state() noexcept;
@@ -122,7 +170,7 @@ public:
      * exact cover problem.
      * \param state a String representation of the problem as a grid.
      * Use '0' to represent non-constrained cells
-     * \return An exact cover problem pointer in case of success, nullptr otherwise
+     * \return A "Sudoku" exact cover problem pointer in case of success, nullptr otherwise
      */
     static std::unique_ptr<Sudoku> generate(const State& state = make_empty_state()) noexcept;
 
@@ -146,7 +194,7 @@ private:
  * generalization of the initial 8-Queen problem (\see
  * https://en.wikipedia.org/wiki/Eight_queens_puzzle) for more informations about.
  */
-class NQueens : public DLX
+class NQueens : public ConcreteProblem
 {
 public:
     static State make_empty_state(size_t dim = 8) noexcept;
@@ -156,7 +204,8 @@ public:
      * \brief generate Generate a data structure corresponding to the "N-Queen" exact cover problem.
      * \param state a String representation of the problem as a grid.
      * Use '0' to represent non-constrained (i.e. empty) cells, everything else for a cell with a
-     * Queen. \return An exact cover problem pointer in case of success, nullptr otherwise
+     * Queen.
+     * \return A "N Queens" exact cover problem pointer in case of success, nullptr otherwise
      */
     static std::unique_ptr<NQueens> generate(const State& state = make_empty_state()) noexcept;
 

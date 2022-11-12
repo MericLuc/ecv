@@ -11,7 +11,7 @@ The **ecv** library consists of a public header [**include/ecv.hpp**](./include/
 **Note** : Everything lives under the **namespace ecv**.
 
 Solve a problem using DLX :
-- **DLX** is the DLX implementation. Concrete exact cover problems inherit from it.
+- **DLX** is the DLX implementation. Concrete and generic exact cover problems inherit from it.
  - **DLX::solve(uint32_t max_nb)** solves the problem and generate at most **max_nb** solutions to the problem.
  - **DLX::apply(const Solution&)** returns the problem state when applying one of its solutions.
 
@@ -99,12 +99,17 @@ Install the project...
 - Sources : https://github.com/MericLuc/ecv-sudoku
 - Online demo : https://mericluc.github.io/ecv/sudoku/app.html
 
+### N Queens
+
+- Sources : https://github.com/MericLuc/ecv-queens
+- Online demo : https://mericluc.github.io/ecv/queens/app.html
+
 ## TODO
 
 - [ ] Add common [exact cover problems](https://en.wikipedia.org/wiki/Exact_cover) implementations
   - [x] Latin square
   - [x] Sudoku
-  - [ ] N Queens problem
+  - [x] N Queens problem
   - [ ] Pentomino tiling
   - ...
 - [ ] Better error handling

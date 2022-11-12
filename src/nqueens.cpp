@@ -29,6 +29,11 @@ NQueens::generate(const State& state) noexcept
     //    - 1 queen per top-right -> bot-left  diagonal (D2)    (2 x (N - 1) - 1)
     int N(std::size(state)), rows{ N * N }, cols{ 6 * (N - 1) };
 
+    // Primary constraints : The constraints that have to be satisfied exactly once
+    // Initialy, there is 2 * N (N for rows and N for cols), but initial conditions
+    // might modify (recude) it
+    int primaryConstraints{ 2 * N };
+
     if (2 > N)
         return nullptr;
 
@@ -45,6 +50,8 @@ NQueens::generate(const State& state) noexcept
             if (0 == val)
                 continue; // No constraint on the node
 
+            primaryConstraints -= 2;
+
             for (int k{ 0 }; k < N; ++k) { // cannot put a queen in the diagonals
                 if ((i + k) < N && (j + k) < N)
                     authRows[(i + k) * N + (j + k)] = 0;
@@ -52,7 +59,7 @@ NQueens::generate(const State& state) noexcept
                     authRows[(i + k) * N + (j - k)] = 0;
                 if ((i - k) >= 0 && (j + k) < N)
                     authRows[(i - k) * N + (j + k)] = 0;
-                if ((i - k) <= 0 && (j - k) >= 0)
+                if ((i - k) >= 0 && (j - k) >= 0)
                     authRows[(i - k) * N + (j - k)] = 0;
 
                 authRows[i * N + k] = 0; // cannot put queen in the line
@@ -115,7 +122,7 @@ NQueens::generate(const State& state) noexcept
     // In the N-Queens problem, only columns/rows constraints are primary.
     // Diagonal constraints are secondary, meaning it cannot be satisfied more than one time
     // but can be left unsatisfied.
-    return std::make_unique<shared_enabler>(adj, R, C, rowsList, state, 2 * N);
+    return std::make_unique<shared_enabler>(adj, R, C, rowsList, state, primaryConstraints);
 }
 
 /*****************************************************************************/

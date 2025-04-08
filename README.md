@@ -20,7 +20,7 @@ Create a solvable concrete problem :
 
 Here is an example : 
 
-```
+```c++
 #include <ecv.hpp>
 
 #include <iostream>
@@ -58,7 +58,7 @@ int main() {
 }
 ```
 
-```
+```bash
 [~/tests/ecv] ./test-ecv 
 5 1 2 3 4 
 1 4 5 2 3 
@@ -69,7 +69,7 @@ int main() {
 
 ### Build
 
-```
+```bash
 [~/builds/ecv] cmake -S ~${YOUR_ECV_PATH} -DCMAKE_INSTALL_PREFIX=${YOUR_INSTALL_DIR}
 -- Configuring done
 -- Generating done
@@ -78,7 +78,7 @@ int main() {
 
 ### Install
 
-```
+```bash
 [~/builds/ecv] make install
 [100%] Built target ecv
 Install the project...
